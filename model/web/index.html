@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>What Phone am I Using?</title><script src="tf.js"></script>
+    <style>
+        .dropzone {
+            background: #F5F5F5;
+            border-radius: 5px;
+            padding: 100px 25px;
+            text-align: center;
+            cursor: pointer;
+            box-sizing: border-box;
+            border: 5px solid #F5F5F5;
+        }
+
+        .dropzone * {
+            box-sizing: border-box;
+        }
+
+        .dropzone:hover,
+        .dropzone.active {
+            border: 5px dashed #AFAFAF;
+        }
+
+        .dropzone .file {
+            display: none;
+        }
+
+        .dropzone .prompt {
+            font-size: 2em;
+        }
+
+        .dropzone .preview {
+            max-height: 100px;
+            display: block;
+            margin: auto;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>What Phone am I Using?</h1>
+    <h2>By SagaxAI</h2>
+    <div class="dropzone" id="zone">
+        <span class="prompt" id="prompt">Drag a file here...</span>
+        <img class="preview" alt="" id="preview">
+        <input type="file" class="file" id="file">
+    </div>
+    <h2 id="result"></h2>
+    <script>
+        let input_button = document.getElementById('file');
+        let image = document.getElementById('preview');
+        document.getElementById('zone').onclick = function() {
+            document.getElementById('file').click();
+        }
+        document.getElementById('zone').ondragenter = function(e) {
+            e.preventDefault();
+            document.getElementById('zone').classList.add('active');
+        }
+        document.getElementById('zone').ondragleave = function(e) {
+            e.preventDefault();
+            document.getElementById('zone').classList.remove('active');
+        }
+        document.getElementById('zone').ondragover = function(e) {
+            e.preventDefault();
+        }
+        document.getElementById('zone').ondrop = function(e) {
+            e.preventDefault();
+            document.getElementById('zone').classList.remove('active');
+            if (e.dataTransfer.files.length) {
+                document.getElementById('file').files = e.dataTransfer.files;
+                document.getElementById('prompt').style.display = 'none';
+                document.getElementById('preview').files = e.dataTransfer.files;
+                var file = e.dataTransfer.files[0];
+                var reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = () => {
+                    document.getElementById('preview').src = reader.result;
+                    predict();
+                };
+            }
+            return false;
+        }
+        async function predict() {
+            var model = await tf.loadGraphModel('./model.json');
+
+            let example = tf.browser.fromPixels(document.getElementById("preview"), 3).cast('float32');
+            console.log(example.shape)
+            example = example.reshape([1, example.shape[0], example.shape[1], example.shape[2]]);
+
+            let prediction = await model.predict(example);
+            let class_scores = await prediction.data();
+            let max_score_id = class_scores.indexOf(Math.max(...class_scores));
+            let classes = ["iPhone 12", "iPhone 13", "iPhone 14", "iPhone 5", "iPhone 4", "iPhone X", "Galaxy", "Pixel", "iPhone 11", "iPhone 6", "iPhone 8", "iPhone SE", "iPhone 7", ];
+
+            console.log(class_scores);
+            document.getElementById("result").innerHTML = classes[max_score_id].toString();
+        }
+
+    </script>
+</body>
+
+</html>
