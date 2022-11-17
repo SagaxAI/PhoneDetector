@@ -94,7 +94,7 @@
             let prediction = await model.predict(example);
             let class_scores = await prediction.data();
             let max_score_id = class_scores.indexOf(Math.max(...class_scores));
-            let classes = ["iPhone 12", "iPhone 13", "iPhone 14", "iPhone 5", "iPhone 4", "iPhone X", "Galaxy", "Pixel", "iPhone 11", "iPhone 6", "iPhone 8", "iPhone SE", "iPhone 7", ];
+            let classes = ["iPhone 12", "iPhone 13", "iPhone 14", "iPhone 5", "iPhone 4", "iPhone X", "Galaxy", "Pixel", "iPhone 11", "iPhone 6", "iPhone 8", "iPhone SE", "iPhone 7"];
 
             console.log(class_scores);
             document.getElementById("result").innerHTML = classes[max_score_id].toString();
